@@ -1,0 +1,70 @@
+<div class="container">
+  <div class="header">
+    <div class="logo">
+      <h2>{{ title }}</h2>
+    </div>
+    <div class="search-container">
+      <span>Search:</span>
+      <select id="userSelect" (change)="onUserChange($event)">
+        <option *ngFor="let user of users()" [value]="user.id">
+          {{ user.username }}
+        </option>
+      </select>
+    </div>
+  </div>
+
+  <div class="main-content">
+    <!-- User Profile Section -->
+    <div class="user-profile">
+      <div class="profile-header">
+        <img [src]="selectedUser().avatar" 
+             [alt]="selectedUser().name + ' Avatar'" 
+             class="profile-avatar">
+        <div class="profile-info">
+          <h3>{{ selectedUser().name }}</h3>
+          <p class="username">{{ selectedUser().username }}</p>
+          <div class="profile-stats">
+            <div class="stat">
+              <span class="stat-value">{{ selectedUser().posts|| 0 }}</span>
+              <span class="stat-label">Posts</span>
+            </div>
+            <div class="stat">
+              <span class="stat-value">{{ selectedUser().followers || 0 }}</span>
+              <span class="stat-label">Followers</span>
+            </div>
+            <div class="stat">
+              <span class="stat-value">{{ selectedUser().following || 0 }}</span>
+              <span class="stat-label">Following</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <p class="profile-bio">{{ selectedUser().bio || 'No bio available' }}</p>
+    </div>
+
+    <!-- Posts and Comments Section -->
+    <div class="content-section">
+      <div class="posts-column">
+        <h3>Posts</h3>
+        <div class="posts-list">
+          <div *ngFor="let post of posts()" 
+               class="post-card" 
+               (click)="onPostSelect(post.id)">
+            <h4>{{ post.title }}</h4>
+            <p>{{ post.body | slice:0:150 }}...</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="comments-column">
+        <h3>Comments</h3>
+        <div class="comments-list">
+          <div *ngFor="let comment of comments()" class="comment-card">
+            <strong>{{ comment.name }}</strong>
+            <p>{{ comment.body }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
