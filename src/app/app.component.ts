@@ -20,6 +20,7 @@ interface Post {
   userId: number;
   title: string;
   body: string;
+  showComments?: boolean; // Add this to track comment visibility
 }
 
 interface Comment {
@@ -74,10 +75,10 @@ export class AppComponent implements OnInit {
         posts: Math.floor(Math.random() * 100),
         followers: Math.floor(Math.random() * 1000),
         following: Math.floor(Math.random() * 500),
-        bio: `Software engineer and tech enthusiast from ${user.address.city}`,
+        bio: `Software engineer and tech enthusiast from ${user.address?.city || 'Unknown'}`,
         avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.username}`
       }));
-
+      
       this.users.update(() => enhancedUsers);
       
       // Select first user by default
@@ -90,7 +91,13 @@ export class AppComponent implements OnInit {
 
   loadPosts(userId: number) {
     this.apiService.getPostsByUser(userId).subscribe(posts => {
-      this.posts.update(() => posts);
+      // Add showComments property to each post
+      const enhancedPosts = posts.map(post => ({
+        ...post,
+        showComments: false
+      }));
+      
+      this.posts.update(() => enhancedPosts);
       
       // Select first post if available
       if (posts.length > 0) {
@@ -123,5 +130,37 @@ export class AppComponent implements OnInit {
     // Update selected post and load its comments
     this.selectedPostId.set(postId);
     this.loadComments(postId);
+  }
+
+  // NEW METHOD: Toggle comments visibility for a post
+  toggleComments(postId: number, event?: Event) {
+    // Prevent triggering post selection when clicking the button
+    if (event) {
+      event.stopPropagation();
+    }
+    
+    this.posts.update(posts => 
+      posts.map(post => {
+        if (post.id === postId) {
+          return { ...post, showComments: !post.showComments };
+        }
+        return post;
+      })
+    );
+    
+    // Load comments if they haven't been loaded yet
+    if (!this.getPostComments(postId).length) {
+      this.loadComments(postId);
+    }
+  }
+
+  // NEW METHOD: Get comments for a specific post
+  getPostComments(postId: number): Comment[] {
+    return this.comments().filter(comment => comment.postId === postId);
+  }
+
+  // NEW METHOD: Track comment button text
+  getCommentButtonText(post: Post): string {
+    return post.showComments ? 'Hide Comments' : 'Comments';
   }
 }
